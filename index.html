@@ -381,12 +381,7 @@
         <span class="blurb-label">About the Project</span>
         
         <p style="margin: 0; line-height: 1.6; color: #000000; font-size: 1.125em;">
-       Landward movement of saltwater underground is increasingly common along low-elevation coastlines. 
-       This site features three shallow wells in Davis, NC that monitor water level, temperature, and 
-       conductivity (a proxy for salinity). The well loggers show real-time fluctuations in water 
-       table height and shallow groundwater salinity caused by tides and precipitation. 
-       These well observations complement the Downeast road flooding information available from the Sunny Day Flooding Project. If you have questions about this data please email dbarber@brynmawr.edu
-
+      Blurb
     </p>
 
 
@@ -444,19 +439,19 @@
         // Sites list with your colors and scientific names
         const sites = [
             
-            { name: "Murphy Cemetery", sn: "z6-33251", sci: snToSci["z6-33251"], lat: 34.789873, lng: -76.4655548, color: "#6b7280" },
-            { name: "Ghost Forest", sn: "z6-33252", sci: snToSci["z6-33252"], lat: 34.7883175, lng: -76.4653989, color: "#10b981" },
-            { name: "Styron Yard", sn: "z6-32414", sci: snToSci["z6-32414"], lat: 34.789731, lng: -76.4612296, color: "#f59e0b" }
+            { name: "Front Basin", sn: "z6-29888", sci: snToSci["z6-33251"], lat: 40.027, lng: -75.316, color: "#6b7280" },
+            { name: "Lake Vickers", sn: "z6-29887", sci: snToSci["z6-33252"], lat: 40.027885, lng: -75.3167732, color: "#10b981" }
+            
         ];
         // Proxy base URL
-        const baseUrl = (window.location.hostname === 'localhost') ? 'http://localhost:3000' : 'https://zentra-proxy.onrender.com';
+        const baseUrl = (window.location.hostname === 'localhost') ? 'http://localhost:10000/zentra' : 'https://vickers-zentra.onrender.com';
         const MAX_PER_PAGE = 1000000;
         let allDevices = {};
         let lastSite = null;
         let perSiteChartInstances = [];
         let combinedChartInstances = [];
         const SENSOR_KEYS = [
-            { key: "Water Level", aliases: ["Water Level", "Level"], type: "level" },
+            { key: "Air Tempature" },
                { key: "Water Temperature", aliases: ["Water Temperature"], type: "temp" },
             { key: "Conductivity", aliases: ["Conductivity", "EC"], type: "ec" }
         ];
