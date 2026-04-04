@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
-    <title>Vickers Data</title>
+    <title>Down East Salt Water Intrusion Monitoring System</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         html,
@@ -369,7 +370,7 @@
 <body>
     <!-- Banner Header -->
     <div class="banner-header">
-        <h1 class="banner-title">Lake Vickers Sensor Data</h1>
+        <h1 class="banner-title">Vickers Sensor Data</h1>
         <img src="Logo.png" alt="Logo" class="banner-logo">
     </div>
     <div class="dashboard-row">
@@ -385,7 +386,17 @@
     </p>
 
 
-     
+        <a href="https://sunnydayflooding.com/view-data/"
+           style="
+             color: #02590f;
+             font-weight: bold;
+             text-align: center;
+             margin-top: auto;
+             display: block;
+           ">
+            Click here for the Sunny Day Flooding Project
+        </a>
+    </div>
 </div>
 
             <div class="controls">
@@ -419,7 +430,13 @@
         <div class="loading" id="loadingMessage">Loading all sites...</div>
     </div>
     <script>
-        
+        // SN to scientific name mapping
+        const snToSci = {
+            "z6-33252": "GF2501",
+            "z6-33251": "MC2501",
+            "z6-32482": "MD2501",
+            "z6-32414": "ML2501"
+        };
         // Sites list with your colors and scientific names
         const sites = [
             
@@ -435,23 +452,23 @@
         let perSiteChartInstances = [];
         let combinedChartInstances = [];
         const SENSOR_KEYS = [
-            {key: "Water Level"},
-               { key: "Water Temperature"},
-            { key: "Conductivity"}
+            { key: "Air Tempature" },
+               { key: "Water Temperature", aliases: ["Water Temperature"], type: "temp" },
+            { key: "Conductivity", aliases: ["Conductivity", "EC"], type: "ec" }
         ];
         
         // Convert millimeters to feet (water level always comes in mm)
-     /*   function toFeet(value) {
+   /*     function toFeet(value) {
             return value * 0.00328084;
         }
-        */
+        
         function toFahrenheit(value, unit) {
             if (!unit) return value;
             const u = unit.toLowerCase();
             if (u.startsWith("c")) return value * 9 / 5 + 32;
             return value;
         }
-        
+        */
         function destroyCharts(chartArray) {
             chartArray.forEach(c => { try { c.destroy(); } catch (e) { } });
             chartArray.length = 0;
@@ -528,7 +545,7 @@
                 html += `
           <div class="sensor-chart-block">
             <div class="sensor-title">
-             ${sensor.type === "level" ? "Water Level (ft)" : sensor.type === "temp" ? "Water Temperature (°C)" : "Conductivity (mS/cm)"}
+             ${sensor.type === "level" ? "Water Level (mm)" : sensor.type === "temp" ? "Water Temperature (°C)" : "Conductivity (mS/cm)"}
             </div>
             <canvas id="${chartId}" class="miniChart"></canvas>
           </div>
@@ -546,7 +563,7 @@
                 let values, label;
                 if (sensor.type === "level") {
                     // Convert mm to feet
-                    values = readings.map(r => toFeet(r.value));
+            /*        values = readings.map(r => toFeet(r.value));
                     label = "Water Level (ft)";
                 } else if (sensor.type === "temp") {
                     values = readings.map(r => toFahrenheit(r.value, units));
@@ -555,6 +572,7 @@
                     values = readings.map(r => r.value);
                     label = "Conductivity (mS/cm)";
                 }
+                */
                 const ctx = document.getElementById(`chart-${site.sn}-${sensor.type}`)?.getContext('2d');
                 if (!ctx) return;
                 const chart = new Chart(ctx, {
