@@ -444,14 +444,14 @@
      /*   function toFeet(value) {
             return value * 0.00328084;
         }
-        
+        */
         function toFahrenheit(value, unit) {
             if (!unit) return value;
             const u = unit.toLowerCase();
             if (u.startsWith("c")) return value * 9 / 5 + 32;
             return value;
         }
-        */
+        
         function destroyCharts(chartArray) {
             chartArray.forEach(c => { try { c.destroy(); } catch (e) { } });
             chartArray.length = 0;
