@@ -430,18 +430,12 @@
         <div class="loading" id="loadingMessage">Loading all sites...</div>
     </div>
     <script>
-        // SN to scientific name mapping
-       /* const snToSci = {
-            "z6-33252": "GF2501",
-            "z6-33251": "MC2501",
-            "z6-32482": "MD2501",
-            "z6-32414": "ML2501"
-        };*/
+       
         // Sites list with your colors and scientific names
         const sites = [
             
-            { name: "Front Basin", sn: "z6-29888", sci: snToSci["z6-33251"], lat: 40.027, lng: -75.316, color: "#6b7280" },
-            { name: "Lake Vickers", sn: "z6-29887", sci: snToSci["z6-33252"], lat: 40.027885, lng: -75.3167732, color: "#10b981" }
+            { name: "Front Basin", sn: "z6-29888", lat: 40.027, lng: -75.316, color: "#6b7280" },
+            { name: "Lake Vickers", sn: "z6-29887", lat: 40.027885, lng: -75.3167732, color: "#10b981" }
             
         ];
         // Proxy base URL
@@ -481,7 +475,7 @@
         // Add markers and hover/click handlers
         sites.forEach(site => {
             const marker = L.marker([site.lat, site.lng]).addTo(map);
-            marker.bindPopup(`<b>${site.name}</b><br>${site.sci}`);
+            marker.bindPopup(`<b>${site.name}</b><br>${site.sn}`);
             marker.on('mouseover', function (e) { this.openPopup(); });
             marker.on('mouseout', function (e) { this.closePopup(); });
             marker.on('click', () => {
@@ -495,7 +489,7 @@
         sites.forEach(site => {
             const opt = document.createElement('option');
             opt.value = site.sn;
-            opt.textContent = `${site.name} (${site.sci})`;
+            opt.textContent = `${site.name} (${site.sn})`;
             siteSelect.appendChild(opt);
         });
         document.getElementById('fetchSelected').addEventListener('click', () => {
@@ -527,7 +521,7 @@
             lastSite = sn;
             const device = allDevices[sn];
             destroyCharts(perSiteChartInstances);
-            let html = `<div class="chart-label" style="color:${site.color}">${site.name} (${site.sci})</div>`;
+            let html = `<div class="chart-label" style="color:${site.color}">${site.name} (${site.sn})</div>`;
             if (!device || !device.data) {
                 document.getElementById('perSiteCharts').innerHTML = html + '<div>No data available.</div>';
                 return;
@@ -561,9 +555,9 @@
                 readings = filterReadings(readings, rangeDays);
                 if (readings.length === 0) return;
                 let values, label;
-                if (sensor.type === "level") {
+              /*  if (sensor.type === "level") {
                     // Convert mm to feet
-            /*        values = readings.map(r => toFeet(r.value));
+                  values = readings.map(r => toFeet(r.value));
                     label = "Water Level (ft)";
                 } else if (sensor.type === "temp") {
                     values = readings.map(r => toFahrenheit(r.value, units));
@@ -617,8 +611,8 @@
                     }
                 });
                 perSiteChartInstances.push(chart);
-            };
-        
+            });
+        }
         function renderCombinedChart() {
             destroyCharts(combinedChartInstances);
             const levelCtx = document.getElementById('combined-level').getContext('2d');
@@ -637,7 +631,7 @@
                     if (readings.length > 0) {
                         // Convert mm to feet
                         levelDatasets.push({
-                            label: site.name + " (" + site.sci + ")",
+                            label: site.name + " (" + site.sn + ")",
                             data: readings.map(r => ({ x: r.datetime, y: toFeet(r.value) })),
                             borderColor: site.color,
                             backgroundColor: site.color + "33",
@@ -655,7 +649,7 @@
                     readings = filterReadings(readings, range);
                    if (readings.length > 0) {
                         ecDatasets.push({
-                        label: site.name + " (" + site.sci + ")",
+                        label: site.name + " (" + site.sn + ")",
                     data: readings.map(r => ({ x: r.datetime, y: r.value })),
                             borderColor: site.color,
                             backgroundColor: site.color + "33",
