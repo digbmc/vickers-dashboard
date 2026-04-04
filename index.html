@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Down East Salt Water Intrusion Monitoring System</title>
+    <title>Vickers Data</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         html,
@@ -369,7 +369,7 @@
 <body>
     <!-- Banner Header -->
     <div class="banner-header">
-        <h1 class="banner-title">Down East Salt Water Intrusion Monitoring System</h1>
+        <h1 class="banner-title">Lake Vickers Sensor Data</h1>
         <img src="Logo.png" alt="Logo" class="banner-logo">
     </div>
     <div class="dashboard-row">
@@ -385,17 +385,7 @@
     </p>
 
 
-        <a href="https://sunnydayflooding.com/view-data/"
-           style="
-             color: #02590f;
-             font-weight: bold;
-             text-align: center;
-             margin-top: auto;
-             display: block;
-           ">
-            Click here for the Sunny Day Flooding Project
-        </a>
-    </div>
+     
 </div>
 
             <div class="controls">
@@ -429,13 +419,7 @@
         <div class="loading" id="loadingMessage">Loading all sites...</div>
     </div>
     <script>
-        // SN to scientific name mapping
-        const snToSci = {
-            "z6-33252": "GF2501",
-            "z6-33251": "MC2501",
-            "z6-32482": "MD2501",
-            "z6-32414": "ML2501"
-        };
+        
         // Sites list with your colors and scientific names
         const sites = [
             
@@ -451,13 +435,13 @@
         let perSiteChartInstances = [];
         let combinedChartInstances = [];
         const SENSOR_KEYS = [
-            { key: "Air Tempature" },
-               { key: "Water Temperature", aliases: ["Water Temperature"], type: "temp" },
-            { key: "Conductivity", aliases: ["Conductivity", "EC"], type: "ec" }
+            {key: "Water Level"},
+               { key: "Water Temperature"},
+            { key: "Conductivity"}
         ];
         
         // Convert millimeters to feet (water level always comes in mm)
-        function toFeet(value) {
+     /*   function toFeet(value) {
             return value * 0.00328084;
         }
         
@@ -467,13 +451,13 @@
             if (u.startsWith("c")) return value * 9 / 5 + 32;
             return value;
         }
-        
+        */
         function destroyCharts(chartArray) {
             chartArray.forEach(c => { try { c.destroy(); } catch (e) { } });
             chartArray.length = 0;
         }
         // Map with ArcGIS imagery and original markers
-        const map = L.map('map').setView([34.788, -76.464], 15);
+        const map = L.map('map').setView([40, -75], 15);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles © Esri'
         }).addTo(map);
