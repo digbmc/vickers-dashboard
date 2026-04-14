@@ -295,7 +295,9 @@
 
             Object.keys(data).forEach(key => {
                 const arr = data[key];
-                if (!Array.isArray(arr) || arr.length === 0) return;
+           if (!Array.isArray(arr) || arr.length === 0) return;
+            const isEC = key.toLowerCase().includes('ec');
+            if (isEC && arr[0].metadata && arr[0].metadata.port_number !== 2) return;
                 const entry    = arr[0];
                 const units    = entry.metadata && entry.metadata.units ? entry.metadata.units : '';
                 const readings = filterByDays(entry.readings || [], days);
