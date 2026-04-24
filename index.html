@@ -408,6 +408,23 @@
             document.getElementById('statusMessage').innerHTML = '';
             document.getElementById('allCharts').innerHTML = html;
 
+            // TEMP DEBUG
+            let dbg = '<div style="background:#1e293b;color:#e2e8f0;border-radius:10px;padding:16px;margin-bottom:24px;font-family:monospace;font-size:0.85em;"><b style="color:#fbbf24;">Raw API keys</b><br><br>';
+            results.forEach(({ site, device }) => {
+                if (!device || !device.data) return;
+                dbg += '<b style="color:' + site.color + ';">' + site.name + '</b><br>';
+                Object.keys(device.data).forEach(key => {
+                    const arr = device.data[key];
+                    if (!Array.isArray(arr) || arr.length === 0) return;
+                    const meta = arr[0].metadata || {};
+                    const skip = shouldSkipSensor(key, arr[0]);
+                    dbg += '<span style="color:' + (skip ? '#f87171' : '#86efac') + ';">' + key + ' | port=' + (meta.port_number ?? '-') + ' | units=' + (meta.units ?? '-') + ' | n=' + (arr[0].readings||[]).length + '</span><br>';
+                });
+                dbg += '<br>';
+            });
+            dbg += '<span style="color:#94a3b8;">green=shown red=filtered</span></div>';
+            document.getElementById('allCharts').innerHTML = dbg + document.getElementById('allCharts').innerHTML;
+
             results.forEach(({ site, device }) => {
                 if (device) buildCharts(site, device, days);
             });
