@@ -232,13 +232,17 @@
             );
         }
 
-        // Only skip the ATMOS 41 atmospheric EC on port 5 — it's a weather station reading,
-        // not a water measurement. Show everything else including port 1 water sensors.
-        function shouldSkipSensor(key, entry) {
+        // Skip entries that have errors or are offline.
+        // Also skip ATMOS 41 EC on port 5 (atmospheric, not water).
+        function shouldSkipEntry(key, entry) {
             const port = entry.metadata && entry.metadata.port_number != null
                 ? entry.metadata.port_number : null;
             const k = key.toLowerCase();
+            // Skip ATMOS atmospheric EC
             if (k === 'ec' && port === 5) return true;
+            // Skip entries where ALL readings are errors
+            const readings = entry.readings || [];
+            if (readings.length > 0 && readings.every(r => r.error_flag || r.value === null)) return true;
             return false;
         }
 
@@ -280,20 +284,25 @@
             Object.keys(data).forEach(key => {
                 const arr = data[key];
                 if (!Array.isArray(arr) || arr.length === 0) return;
-                const entry = arr[0];
-                if (shouldSkipSensor(key, entry)) return;
+                arr.forEach((entry, idx) => {
+                    if (shouldSkipEntry(key, entry)) return;
 
-                const units    = entry.metadata && entry.metadata.units ? entry.metadata.units : '';
-                const readings = filterByDays(entry.readings || [], days);
-                if (readings.length === 0) return;
+                    const units    = entry.metadata && entry.metadata.units ? entry.metadata.units : '';
+                    const port     = entry.metadata && entry.metadata.port_number != null ? entry.metadata.port_number : null;
+                    const readings = filterByDays(entry.readings || [], days);
+                    if (readings.length === 0) return;
 
-                const chartId = `chart-${site.sn}-${key.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                const label   = units ? `${key} (${units})` : key;
-                blocksHtml += `
+                    // If multiple valid entries for same key, suffix with port number
+                    const validCount = arr.filter(e => !shouldSkipEntry(key, e)).length;
+                    const suffix     = validCount > 1 && port != null ? `_p${port}` : '';
+                    const chartId    = `chart-${site.sn}-${key.replace(/[^a-zA-Z0-9]/g, '_')}${suffix}`;
+                    const label      = validCount > 1 && port != null ? `${key} Port ${port} (${units})` : (units ? `${key} (${units})` : key);
+                    blocksHtml += `
                     <div class="sensor-chart-block">
                         <div class="sensor-title">${label}</div>
                         <canvas id="${chartId}" class="sensor-canvas"></canvas>
                     </div>`;
+                });
             });
 
             if (!blocksHtml) return '';
@@ -313,16 +322,19 @@
             Object.keys(data).forEach(key => {
                 const arr = data[key];
                 if (!Array.isArray(arr) || arr.length === 0) return;
-                const entry = arr[0];
-                if (shouldSkipSensor(key, entry)) return;
+                arr.forEach((entry) => {
+                    if (shouldSkipEntry(key, entry)) return;
 
-                const units    = entry.metadata && entry.metadata.units ? entry.metadata.units : '';
-                const readings = filterByDays(entry.readings || [], days);
-                if (readings.length === 0) return;
+                    const units    = entry.metadata && entry.metadata.units ? entry.metadata.units : '';
+                    const port     = entry.metadata && entry.metadata.port_number != null ? entry.metadata.port_number : null;
+                    const readings = filterByDays(entry.readings || [], days);
+                    if (readings.length === 0) return;
 
-                const chartId = `chart-${site.sn}-${key.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                const canvas  = document.getElementById(chartId);
-                if (!canvas) return;
+                    const validCount = arr.filter(e => !shouldSkipEntry(key, e)).length;
+                    const suffix     = validCount > 1 && port != null ? `_p${port}` : '';
+                    const chartId    = `chart-${site.sn}-${key.replace(/[^a-zA-Z0-9]/g, '_')}${suffix}`;
+                    const canvas     = document.getElementById(chartId);
+                    if (!canvas) return;
 
                 const chart = new Chart(canvas.getContext('2d'), {
                     type: 'line',
@@ -362,6 +374,7 @@
                     }
                 });
                 chartInstances.push(chart);
+                });
             });
         }
 
