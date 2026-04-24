@@ -188,8 +188,8 @@
             : 'https://zentra-proxy.onrender.com';
 
         const sites = [
-            { name: "Front Basin",  sn: "z6-29888", lat: 40.0275048, lng: -75.316367,  color: "#10b981" },
-            { name: "Lake Vickers", sn: "z6-29887", lat: 40.0278856, lng: -75.3167732, color: "#f59e0b" }
+            { name: "Front Basin",  sn: "z6-29888", lat: 40.0275048,  lng: -75.316367,  color: "#10b981" },
+            { name: "Lake Vickers", sn: "z6-29887", lat: 40.0278856,  lng: -75.3167732, color: "#f59e0b" }
         ];
 
         let chartInstances = [];
@@ -224,16 +224,28 @@
 
         function filterByDays(readings, days) {
             const cutoff = new Date(Date.now() - days * 86400000);
-            return readings.filter(r => new Date(r.datetime) >= cutoff && r.value !== null && r.value !== undefined && !r.error_flag);
+            return readings.filter(r =>
+                new Date(r.datetime) >= cutoff &&
+                r.value !== null &&
+                r.value !== undefined &&
+                !r.error_flag
+            );
         }
 
-        // Shared helper: returns true if this sensor key/entry should be skipped.
-        // The Zentra API already de-duplicates — it returns only one entry per key name
-        // (the active port), so no port-number filtering is needed for Water Level/Temp/EC.
-        // The only exception: skip the ATMOS 41 EC on port 5 (atmospheric, not water).
+        // The new proxy re-keys sensor names as "EC (Port 1)", "EC (Port 2)" etc.
+        // Skip broken ports 1 and 6 (HYDROS no response) and port 5 ATMOS atmospheric EC.
         function shouldSkipSensor(key, entry) {
+            const port = entry.metadata && entry.metadata.port_number != null
+                ? entry.metadata.port_number : null;
             const k = key.toLowerCase();
-            if (k === 'ec' && entry.metadata && entry.metadata.port_number === 5) return true;
+
+            // Skip ATMOS atmospheric EC on port 5
+            if (k.includes('ec') && port === 5) return true;
+
+            // Skip broken HYDROS sensors on ports 1 and 6
+            if ((k.includes('ec') || k.includes('water level') || k.includes('water temperature'))
+                && (port === 1 || port === 6)) return true;
+
             return false;
         }
 
@@ -276,8 +288,6 @@
                 const arr = data[key];
                 if (!Array.isArray(arr) || arr.length === 0) return;
                 const entry = arr[0];
-
-                // Skip EC sensors not on port 2
                 if (shouldSkipSensor(key, entry)) return;
 
                 const units    = entry.metadata && entry.metadata.units ? entry.metadata.units : '';
@@ -311,8 +321,6 @@
                 const arr = data[key];
                 if (!Array.isArray(arr) || arr.length === 0) return;
                 const entry = arr[0];
-
-                // Skip EC sensors not on port 2
                 if (shouldSkipSensor(key, entry)) return;
 
                 const units    = entry.metadata && entry.metadata.units ? entry.metadata.units : '';
@@ -372,7 +380,6 @@
             document.getElementById('lastUpdated').textContent = '';
             setStatus('Loading sensor data…');
 
-            // Fetch all sites in parallel, preserve order
             const results = await Promise.all(
                 sites.map(async site => {
                     try {
@@ -385,7 +392,6 @@
                 })
             );
 
-            // Build HTML for all sites first
             let html = '';
             results.forEach(({ site, device, error }) => {
                 if (!device) {
@@ -402,7 +408,6 @@
             document.getElementById('statusMessage').innerHTML = '';
             document.getElementById('allCharts').innerHTML = html;
 
-            // Then build charts (canvases now exist in DOM)
             results.forEach(({ site, device }) => {
                 if (device) buildCharts(site, device, days);
             });
