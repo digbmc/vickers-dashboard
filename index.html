@@ -423,7 +423,7 @@
                     const arr = device.data[key];
                     if (!Array.isArray(arr) || arr.length === 0) return;
                     const meta = arr[0].metadata || {};
-                    const skip = shouldSkipSensor(key, arr[0]);
+                    const skip = shouldSkipEntry(key, arr[0]);
                     dbg += '<span style="color:' + (skip ? '#f87171' : '#86efac') + ';">' + key + ' | port=' + (meta.port_number ?? '-') + ' | units=' + (meta.units ?? '-') + ' | n=' + (arr[0].readings||[]).length + '</span><br>';
                 });
                 dbg += '<br>';
