@@ -232,20 +232,13 @@
             );
         }
 
-        // The new proxy re-keys sensor names as "EC (Port 1)", "EC (Port 2)" etc.
-        // Skip broken ports 1 and 6 (HYDROS no response) and port 5 ATMOS atmospheric EC.
+        // Only skip the ATMOS 41 atmospheric EC on port 5 — it's a weather station reading,
+        // not a water measurement. Show everything else including port 1 water sensors.
         function shouldSkipSensor(key, entry) {
             const port = entry.metadata && entry.metadata.port_number != null
                 ? entry.metadata.port_number : null;
             const k = key.toLowerCase();
-
-            // Skip ATMOS atmospheric EC on port 5
-            if (k.includes('ec') && port === 5) return true;
-
-            // Skip broken HYDROS sensors on ports 1 and 6
-            if ((k.includes('ec') || k.includes('water level') || k.includes('water temperature'))
-                && (port === 1 || port === 6)) return true;
-
+            if (k === 'ec' && port === 5) return true;
             return false;
         }
 
