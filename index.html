@@ -228,15 +228,12 @@
         }
 
         // Shared helper: returns true if this sensor key/entry should be skipped.
-        // The Lake Vickers ZL6 has three HYDROS 21 sensors (ports 1, 2, 6) reporting
-        // Water Level, Water Temperature, and EC. Ports 1 and 6 are broken ("No response").
-        // Port 5 is an ATMOS 41 G2 weather station that also reports an EC field we don't want.
-        // Rule: for any water-measurement key, only show port 2.
-        const WATER_KEYS = ['ec', 'water level', 'water temperature'];
+        // The Zentra API already de-duplicates — it returns only one entry per key name
+        // (the active port), so no port-number filtering is needed for Water Level/Temp/EC.
+        // The only exception: skip the ATMOS 41 EC on port 5 (atmospheric, not water).
         function shouldSkipSensor(key, entry) {
             const k = key.toLowerCase();
-            const isWaterMeasurement = WATER_KEYS.some(wk => k.includes(wk));
-            if (isWaterMeasurement && entry.metadata && entry.metadata.port_number !== 2) return true;
+            if (k === 'ec' && entry.metadata && entry.metadata.port_number === 5) return true;
             return false;
         }
 
