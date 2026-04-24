@@ -196,10 +196,10 @@
 
         // ── Map ──────────────────────────────────────────────────────────────
         const map = L.map('map').setView([40.02770, -75.31660], 17);
-       L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }
-).addTo(map);
+        L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }
+        ).addTo(map);
 
         sites.forEach(site => {
             const marker = L.marker([site.lat, site.lng]).addTo(map);
@@ -225,6 +225,14 @@
         function filterByDays(readings, days) {
             const cutoff = new Date(Date.now() - days * 86400000);
             return readings.filter(r => new Date(r.datetime) >= cutoff);
+        }
+
+        // Shared helper: returns true if this sensor key/entry should be skipped.
+        // EC sensors are filtered to port 2 only (port 1 is broken on Lake Vickers).
+        function shouldSkipSensor(key, entry) {
+            const isEC = key.toLowerCase().includes('ec');
+            if (isEC && entry.metadata && entry.metadata.port_number !== 2) return true;
+            return false;
         }
 
         function destroyAllCharts() {
@@ -265,7 +273,11 @@
             Object.keys(data).forEach(key => {
                 const arr = data[key];
                 if (!Array.isArray(arr) || arr.length === 0) return;
-                const entry    = arr[0];
+                const entry = arr[0];
+
+                // Skip EC sensors not on port 2
+                if (shouldSkipSensor(key, entry)) return;
+
                 const units    = entry.metadata && entry.metadata.units ? entry.metadata.units : '';
                 const readings = filterByDays(entry.readings || [], days);
                 if (readings.length === 0) return;
@@ -295,10 +307,12 @@
 
             Object.keys(data).forEach(key => {
                 const arr = data[key];
-           if (!Array.isArray(arr) || arr.length === 0) return;
-            const isEC = key.toLowerCase().includes('ec');
-            if (isEC && arr[0].metadata && arr[0].metadata.port_number !== 2) return;
-                const entry    = arr[0];
+                if (!Array.isArray(arr) || arr.length === 0) return;
+                const entry = arr[0];
+
+                // Skip EC sensors not on port 2
+                if (shouldSkipSensor(key, entry)) return;
+
                 const units    = entry.metadata && entry.metadata.units ? entry.metadata.units : '';
                 const readings = filterByDays(entry.readings || [], days);
                 if (readings.length === 0) return;
