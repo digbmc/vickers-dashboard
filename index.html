@@ -224,7 +224,7 @@
 
         function filterByDays(readings, days) {
             const cutoff = new Date(Date.now() - days * 86400000);
-            return readings.filter(r => new Date(r.datetime) >= cutoff);
+            return readings.filter(r => new Date(r.datetime) >= cutoff && r.value !== null && r.value !== undefined && !r.error_flag);
         }
 
         // Shared helper: returns true if this sensor key/entry should be skipped.
@@ -401,31 +401,6 @@
 
             document.getElementById('statusMessage').innerHTML = '';
             document.getElementById('allCharts').innerHTML = html;
-
-            // ── DEBUG PANEL ──────────────────────────────────────────────────
-            let debugHtml = `<div id="debugPanel" style="background:#1e293b;color:#e2e8f0;border-radius:10px;padding:16px;margin-bottom:24px;font-family:monospace;font-size:0.85em;">
-                <div style="font-size:1.1em;font-weight:bold;color:#fbbf24;margin-bottom:10px;">🔍 Debug: Raw Sensor Keys from API</div>`;
-            results.forEach(({ site, device }) => {
-                if (!device || !device.data) return;
-                debugHtml += `<div style="margin-bottom:10px;"><span style="color:${site.color};font-weight:bold;">${site.name} (${site.sn})</span><table style="margin-top:6px;border-collapse:collapse;width:100%;">
-                    <tr style="color:#94a3b8;"><th style="text-align:left;padding:2px 12px 2px 0;">key</th><th style="text-align:left;padding:2px 12px 2px 0;">port_number</th><th style="text-align:left;padding:2px 12px 2px 0;">units</th><th style="text-align:left;padding:2px 0;">readings</th></tr>`;
-                Object.keys(device.data).forEach(key => {
-                    const arr = device.data[key];
-                    if (!Array.isArray(arr) || arr.length === 0) return;
-                    const meta = arr[0].metadata || {};
-                    const skipped = shouldSkipSensor(key, arr[0]);
-                    const rowColor = skipped ? '#f87171' : '#86efac';
-                    debugHtml += `<tr style="color:${rowColor};">
-                        <td style="padding:2px 12px 2px 0;">${key}</td>
-                        <td style="padding:2px 12px 2px 0;">${meta.port_number ?? '—'}</td>
-                        <td style="padding:2px 12px 2px 0;">${meta.units ?? '—'}</td>
-                        <td style="padding:2px 0;">${(arr[0].readings||[]).length}</td>
-                    </tr>`;
-                });
-                debugHtml += `</table></div>`;
-            });
-            debugHtml += `<div style="color:#94a3b8;margin-top:8px;">🟢 green = shown &nbsp; 🔴 red = filtered out</div></div>`;
-            document.getElementById('allCharts').innerHTML = debugHtml + document.getElementById('allCharts').innerHTML;
 
             // Then build charts (canvases now exist in DOM)
             results.forEach(({ site, device }) => {
