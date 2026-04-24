@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
 
+
         html, body { max-width: 100vw; overflow-x: hidden; }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -185,9 +186,7 @@
 </div>
 
 <script>
-    // ── BMC Colors ────────────────────────────────────────────────────────
-    // Site colors: Front Basin = Evergreen, Lake Vickers = Bronze
-    // EC line: site color | Precip fill: Wisteria | Temp: Blaze | Water Level: Patina border / Evergreen
+   
     const BMC = {
         navy:       '#002858',
         lantern:    '#FFC600',
@@ -205,8 +204,8 @@
         : 'https://vickers-zentra.onrender.com';
 
     const sites = [
-        { name: "Front Basin",  sn: "z6-29888", lat: 40.0275048,  lng: -75.316367,  color: '#4CAF82' },
-        { name: "Lake Vickers", sn: "z6-29887", lat: 40.0278856,  lng: -75.3167732, color: BMC.bronze }
+        { name: "Lake Vickers", sn: "z6-29887", lat: 40.0278856,  lng: -75.3167732, color: BMC.bronze },
+        { name: "Front Basin",  sn: "z6-29888", lat: 40.0275048,  lng: -75.316367,  color: '#4CAF82' }
     ];
 
     let chartInstances = [];
@@ -475,7 +474,7 @@
                             label: 'Water Level',
                             data: readings.map(r => ({ x: r.datetime, y: r.value })),
                             fill: false,
-                            borderColor: BMC.evergreen,
+                            borderColor: site.color,
                             backgroundColor: 'transparent',
                             borderWidth: 2, tension: 0.1, pointRadius: 0
                         }], units, false);
@@ -495,7 +494,7 @@
                             label: 'Water Temperature',
                             data: readings.map(r => ({ x: r.datetime, y: r.value })),
                             fill: false,
-                            borderColor: BMC.blaze,
+                            borderColor: site.color,
                             backgroundColor: 'transparent',
                             borderWidth: 2, tension: 0.1, pointRadius: 0
                         }], units, false);
